@@ -1,0 +1,3 @@
+[submodule "vendors/mpu_6050"]
+	path = vendors/mpu_6050
+	url = git@github.com:HumansAreWeak/rpi-pico-mpu6050.git

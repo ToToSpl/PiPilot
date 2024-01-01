@@ -14,10 +14,12 @@ project(pi_pilot)
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-add_executable(pilot src/main.c)
+add_subdirectory(vendors)
+
+add_executable(pilot src/main.c )
 
 # pull in common dependencies
-target_link_libraries(pilot pico_stdlib pico_multicore)
+target_link_libraries(pilot pico_stdlib pico_multicore hardware_i2c haw_mpu6050)
 
 pico_enable_stdio_usb(pilot 1)
 pico_enable_stdio_uart(pilot 0)

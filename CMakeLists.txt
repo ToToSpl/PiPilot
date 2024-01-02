@@ -16,7 +16,7 @@ pico_sdk_init()
 
 add_subdirectory(vendors)
 
-add_executable(pilot src/main.c )
+add_executable(pilot src/main.c src/madgwick.c)
 
 # pull in common dependencies
 target_link_libraries(pilot pico_stdlib pico_multicore hardware_i2c haw_mpu6050)

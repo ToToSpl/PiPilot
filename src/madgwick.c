@@ -120,6 +120,12 @@ void imu_filter(float ax, float ay, float az, float gx, float gy, float gz) {
                               //(shown in diagram, plus always use unit quaternions for orientation)
 }
 
+inline float constrain(float val, float min_val, float max_val) {
+  float t = fmaxf(val, min_val);
+  t = fminf(val, max_val);
+  return t;
+}
+
 /*
  returns as pointers, roll pitch and yaw from the quaternion generated in imu_filter
  Assume right hand system
@@ -129,21 +135,9 @@ void imu_filter(float ax, float ay, float az, float gx, float gy, float gz) {
  */
 void eulerAngles(struct quaternion q, float *roll, float *pitch, float *yaw) {
 
-  float sinr_cosp = 2.0 * (q.q1 * q.q2 + q.q3 * q.q4);
-  float cosr_cosp = 1.0 - 2.0 * (q.q2 * q.q2 + q.q3 * q.q3);
-  *roll = atan2f(sinr_cosp, cosr_cosp);
-
-  float sinp = sqrtf(1.0 + 2.0 * (q.q1 * q.q3 - q.q2 * q.q4));
-  float cosp = sqrtf(1.0 - 2.0 * (q.q1 * q.q3 - q.q2 * q.q4));
-  *pitch = 2.0 * atan2f(sinp, cosp) - PI / 2.0;
-
-  float siny_cosp = 2.0 * (q.q1 * q.q4 + q.q2 * q.q3);
-  float cosy_cosp = 1.0 - 2.0 * (q.q3 * q.q3 + q.q4 * q.q4);
-  *yaw = atan2f(siny_cosp, cosy_cosp);
-
-  // *yaw = atan2f((2 * q.q2 * q.q3 - 2 * q.q1 * q.q4), (2 * q.q1 * q.q1 + 2 * q.q2 * q.q2 - 1)); //
-  // equation (7) *pitch = -asinf(2 * q.q2 * q.q4 + 2 * q.q1 * q.q3); // equatino (8) *roll =
-  // atan2f((2 * q.q3 * q.q4 - 2 * q.q1 * q.q2), (2 * q.q1 * q.q1 + 2 * q.q4 * q.q4 - 1));
+  *roll = atan2f(q.q1 * q.q2 + q.q3 * q.q4, 0.5f - q.q2 * q.q2 - q.q3 * q.q3);
+  *pitch = -asinf(constrain(-2.0f * (q.q2 * q.q4 - q.q1 * q.q3), -0.999999, 0.999999));
+  *yaw = -atan2f(q.q2 * q.q3 + q.q1 * q.q4, 0.5f - q.q3 * q.q3 - q.q4 * q.q4);
 
   *yaw *= (180.0f / PI);
   *pitch *= (180.0f / PI);

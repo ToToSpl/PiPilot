@@ -16,10 +16,27 @@ pico_sdk_init()
 
 add_subdirectory(vendors)
 
-add_executable(pilot src/main.c src/madgwick.c)
+add_executable(
+  pilot
+  src/main.c
+  src/madgwick.c
+  src/crsf_pio_rx.c
+)
+
+pico_generate_pio_header(
+  pilot
+  ${CMAKE_CURRENT_LIST_DIR}/src/uart_rx.pio
+)
 
 # pull in common dependencies
-target_link_libraries(pilot pico_stdlib pico_multicore hardware_i2c haw_mpu6050)
+target_link_libraries(
+  pilot 
+  pico_stdlib 
+  pico_multicore
+  hardware_pio
+  hardware_i2c 
+  haw_mpu6050
+)
 
 pico_enable_stdio_usb(pilot 1)
 pico_enable_stdio_uart(pilot 0)

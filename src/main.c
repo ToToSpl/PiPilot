@@ -1,12 +1,19 @@
+#include "crsf_pio_rx.h"
 #include "haw/MPU6050.h"
 #include "madgwick.h"
 #include "mpu_6050_init.h"
+
 #include "pico/multicore.h"
 #include "pico/stdio.h"
 #include "pico/stdlib.h"
 #include "pico/time.h"
 #include "pico/types.h"
+
 #include <stdio.h>
+
+#define PIO_RX_PIN 22
+#define SERIAL_BAUD 9600 / 8
+#define CHANNEL_AMOUNT 8
 
 void main_core1() {
 
@@ -59,7 +66,7 @@ void main_core1() {
     // est_pitch += DELTA_T * gyro->y;
     // est_yaw += DELTA_T * gyro->z;
     // printQuaternion(q_est);
-    printf("kHz: %.2f\tPitch: %.2f\tRoll: %.2f\tYaw: %.2f\n", khz, est_pitch, est_roll, est_yaw);
+    // printf("kHz: %.2f\tPitch: %.2f\tRoll: %.2f\tYaw: %.2f\n", khz, est_pitch, est_roll, est_yaw);
     khz = (1.0 / (0.000001 * (float)absolute_time_diff_us(start, get_absolute_time()))) / 1000.0;
   }
 }
@@ -73,9 +80,9 @@ int main() {
 
   multicore_launch_core1(main_core1);
 
-  while (1) {
-    // printf("Hello World1!\n");
+  crsf_init();
 
+  while (1) {
     sleep_ms(1000);
   }
 

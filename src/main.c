@@ -12,8 +12,7 @@
 #include <stdio.h>
 
 #define PIO_RX_PIN 22
-#define SERIAL_BAUD 9600 / 8
-#define CHANNEL_AMOUNT 8
+#define SERIAL_BAUD 115200
 
 void main_core1() {
 
@@ -80,10 +79,20 @@ int main() {
 
   multicore_launch_core1(main_core1);
 
-  crsf_init();
+  crsf_init(PIO_RX_PIN, SERIAL_BAUD);
+
+  crsf_packet rc_packet;
 
   while (1) {
-    sleep_ms(1000);
+    crsf_get_packet(&rc_packet);
+
+    printf("%i\t", rc_packet.crc_ok);
+    for (uint8_t i = 0; i < CHANNEL_AMOUNT; i++) {
+      printf("%i\t", rc_packet.channels[i]);
+    }
+    printf("\n");
+
+    sleep_ms(200);
   }
 
   return 0;

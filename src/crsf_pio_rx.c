@@ -14,8 +14,11 @@ uint sm;
 int8_t pio_irq;
 uint offset;
 
-uint8_t *data_buf_read[PACKET_SIZE];
-uint8_t *data_buf_write[PACKET_SIZE];
+uint8_t data_buf_1[PACKET_SIZE];
+uint8_t data_buf_2[PACKET_SIZE];
+uint8_t *data_buf_read = data_buf_1;
+uint8_t *data_buf_write = data_buf_2;
+// uint8_t data_buf_read[PACKET_SIZE];
 uint8_t buf_index = 0;
 bool read_started = false;
 
@@ -32,12 +35,15 @@ static void pio_irq_func(void) {
     if (!read_started)
       continue;
 
-    (*data_buf_write)[buf_index++] = c;
+    *(data_buf_read + buf_index) = c;
+    // (*data_buf_write)[buf_index] = c;
+    // data_buf_read[buf_index] = c;
+    buf_index += 1;
 
     if (buf_index == PACKET_SIZE) {
-      uint8_t *tmp = *data_buf_read;
-      *data_buf_read = *data_buf_write;
-      *data_buf_write = tmp;
+      uint8_t *tmp = data_buf_read;
+      data_buf_read = data_buf_write;
+      data_buf_write = tmp;
 
       buf_index = 0;
       read_started = false;
@@ -150,15 +156,15 @@ uint8_t crsf_crc8(const uint8_t *ptr, uint8_t len) {
 void crsf_get_packet(crsf_packet *packet_buf) {
   // first check if packet is of correct type
   {
-    bool check = (*data_buf_read)[0] == PACKET_START && (*data_buf_read)[1] == PACKET_RC_LEN &&
-                 (*data_buf_read)[2] == CRSF_FRAMETYPE_RC_CHANNELS_PACKED;
+    bool check = *(data_buf_read + 0) == PACKET_START && *(data_buf_read + 1) == PACKET_RC_LEN &&
+                 *(data_buf_read + 2) == CRSF_FRAMETYPE_RC_CHANNELS_PACKED;
     if (!check) {
       packet_buf->crc_ok = false;
       return;
     }
   }
 
-  unpackChannels(&(*data_buf_read)[3], packet_buf->channels);
-  uint8_t crc = crsf_crc8(&(*data_buf_read)[2], PACKET_RC_LEN + 1);
-  packet_buf->crc_ok = crc == (*data_buf_read)[PACKET_SIZE - 1];
+  unpackChannels((data_buf_read + 3), packet_buf->channels);
+  uint8_t crc = crsf_crc8((data_buf_read + 2), PACKET_SIZE - 3);
+  packet_buf->crc_ok = crc == *(data_buf_read + PACKET_SIZE - 1);
 }

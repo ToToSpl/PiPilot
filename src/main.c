@@ -86,13 +86,12 @@ int main() {
   while (1) {
     crsf_get_packet(&rc_packet);
 
-    printf("%i\t", rc_packet.crc_ok);
-    for (uint8_t i = 0; i < CHANNEL_AMOUNT; i++) {
-      printf("%i\t", rc_packet.channels[i]);
+    if (rc_packet.crc_ok) {
+      for (uint8_t i = 0; i < 8; i++) {
+        printf("%i\t", rc_packet.channels[i]);
+      }
+      printf("\n");
     }
-    printf("\n");
-
-    sleep_ms(200);
   }
 
   return 0;

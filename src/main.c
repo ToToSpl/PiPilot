@@ -2,6 +2,7 @@
 #include "haw/MPU6050.h"
 #include "madgwick.h"
 #include "mpu_6050_init.h"
+#include "servo.h"
 
 #include "pico/multicore.h"
 #include "pico/stdio.h"
@@ -13,6 +14,8 @@
 
 #define PIO_RX_PIN 22
 #define SERIAL_BAUD 115200
+
+servo_h m_left_front, m_left_rear, m_right_front, m_right_rear;
 
 void main_core1() {
 
@@ -83,15 +86,44 @@ int main() {
 
   crsf_packet rc_packet;
 
-  while (1) {
-    crsf_get_packet(&rc_packet);
+  servo_init(&m_left_front, 20);
+  servo_init(&m_left_rear, 21);
+  servo_init(&m_right_front, 19);
+  servo_init(&m_right_rear, 18);
 
-    if (rc_packet.crc_ok) {
-      for (uint8_t i = 0; i < 8; i++) {
-        printf("%i\t", rc_packet.channels[i]);
-      }
-      printf("\n");
+  sleep_ms(5000);
+
+  servo_set_pos(&m_left_front, 100);
+  servo_set_pos(&m_right_front, 100);
+  servo_set_pos(&m_left_rear, 100);
+  servo_set_pos(&m_right_rear, 100);
+
+  sleep_ms(5000);
+
+  bool direction = true;
+
+  while (1) {
+
+    float step = direction ? 5.0 : -5.0;
+
+    servo_set_pos(&m_left_front, m_left_front.range + step);
+    if (m_left_front.range >= 100.0) {
+      direction = false;
     }
+    if (m_left_front.range <= 0.0) {
+      direction = true;
+    }
+
+    sleep_ms(200);
+
+    // crsf_get_packet(&rc_packet);
+    //
+    // if (rc_packet.crc_ok) {
+    //   for (uint8_t i = 0; i < 8; i++) {
+    //     printf("%i\t", rc_packet.channels[i]);
+    //   }
+    //   printf("\n");
+    // }
   }
 
   return 0;

@@ -36,8 +36,6 @@ static void pio_irq_func(void) {
       continue;
 
     *(data_buf_read + buf_index) = c;
-    // (*data_buf_write)[buf_index] = c;
-    // data_buf_read[buf_index] = c;
     buf_index += 1;
 
     if (buf_index == PACKET_SIZE) {

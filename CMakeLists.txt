@@ -21,6 +21,7 @@ add_executable(
   src/main.c
   src/madgwick.c
   src/crsf_pio_rx.c
+  src/servo.c
 )
 
 pico_generate_pio_header(
@@ -35,6 +36,8 @@ target_link_libraries(
   pico_multicore
   hardware_pio
   hardware_i2c 
+  hardware_pwm
+  hardware_clocks
   haw_mpu6050
 )
 
